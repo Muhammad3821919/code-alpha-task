@@ -1,0 +1,59 @@
+# Basic Network Sniffer using Scapy
+# Author: Your Name
+# CodeAlpha Cyber Security Internship - August 2026
+
+from scapy.all import sniff, IP, TCP, UDP, ICMP
+from datetime import datetime
+
+def packet_callback(packet):
+    """Har packet ko analyze karega"""
+    print("\n" + "="*60)
+    print(f"Time: {datetime.now().strftime('%H:%M:%S')}")
+    
+    # Check if IP layer hai
+    if IP in packet:
+        ip_src = packet[IP].src
+        ip_dst = packet[IP].dst
+        protocol = packet[IP].proto
+        
+        print(f"Source IP      : {ip_src}")
+        print(f"Destination IP : {ip_dst}")
+        
+        # Protocol identify karna
+        if protocol == 6:
+            proto_name = "TCP"
+        elif protocol == 17:
+            proto_name = "UDP"
+        elif protocol == 1:
+            proto_name = "ICMP"
+        else:
+            proto_name = str(protocol)
+            
+        print(f"Protocol       : {proto_name}")
+        
+        # Payload show karna
+        if packet.haslayer('Raw'):
+            payload = packet['Raw'].load
+            print(f"Payload Length : {len(payload)} bytes")
+            print(f"Payload Preview: {payload[:50]}") # sirf first 50 bytes
+        
+        # Agar TCP/UDP hai to ports bhi dikhao
+        if TCP in packet:
+            print(f"Source Port    : {packet[TCP].sport}")
+            print(f"Dest Port      : {packet[TCP].dport}")
+        elif UDP in packet:
+            print(f"Source Port    : {packet[UDP].sport}")
+            print(f"Dest Port      : {packet[UDP].dport}")
+
+def main():
+    print("="*60)
+    print("    BASIC NETWORK SNIFFER - CodeAlpha Internship")
+    print("="*60)
+    print("[*] Sniffing started... Press Ctrl+C to stop")
+    print("[*] Note: Run as Administrator/Root")
+    
+    # 50 packets capture karega. Aap number change kar sakte ho
+    sniff(prn=packet_callback, count=50, store=0)
+
+if __name__ == "__main__":
+    main()
